@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useData } from '../contexts/DataContext';
 import { GlassCard } from '../components/GlassCard';
 import { GlassButton } from '../components/GlassButton';
@@ -7,6 +7,7 @@ import { Calendar, MagnifyingGlass, Tag, Funnel, X, ArrowRight } from 'phosphor-
 import { NewsItem } from '../types';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
+import { formatDateForDisplay, getDateTimestamp } from '../lib/date';
 
 export const News: React.FC = () => {
   const { news } = useData();
@@ -17,7 +18,12 @@ export const News: React.FC = () => {
 
   const categories = ['Todas', ...Array.from(new Set(news.map(item => item.category)))];
 
-  const filteredNews = news.filter(item => {
+  const sortedNews = useMemo(
+    () => [...news].sort((a, b) => getDateTimestamp(b.date) - getDateTimestamp(a.date)),
+    [news]
+  );
+
+  const filteredNews = sortedNews.filter(item => {
     const matchesCategory = filter === 'Todas' || item.category === filter;
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.summary.toLowerCase().includes(searchTerm.toLowerCase());
@@ -78,7 +84,7 @@ export const News: React.FC = () => {
           </div>
 
           <div className="relative w-full md:w-80">
-            <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none" size={20} weight="regular" />
+            <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-700 dark:text-primary-300 drop-shadow-sm pointer-events-none z-10" size={20} weight="bold" />
             <input
               type="text"
               placeholder="Buscar notícia..."
@@ -104,7 +110,7 @@ export const News: React.FC = () => {
                 <div className="p-6 flex flex-col flex-grow">
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 mb-4">
                     <Calendar size={14} weight="regular" />
-                    <span>{item.date}</span>
+                    <span>{formatDateForDisplay(item.date)}</span>
                   </div>
                   <h3 className="text-xl font-bold font-display text-slate-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors leading-tight">
                     {item.title}
@@ -140,12 +146,12 @@ export const News: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent"></div>
               <div className="absolute top-6 left-6 flex gap-2">
-                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm ${selectedNews.type === 'edital' ? 'bg-purple-600' : 'bg-accent-500'}`}>
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm ${selectedNews.type === 'edital' ? 'bg-primary-600' : 'bg-accent-500'}`}>
                   <Tag size={12} className="text-white" />
                   {selectedNews.type === 'edital' ? 'EDITAL' : selectedNews.category}
                 </span>
                 <span className="px-3 py-1 rounded-full bg-white/90 text-xs font-bold text-slate-800 shadow-sm">
-                  {selectedNews.date}
+                  {formatDateForDisplay(selectedNews.date)}
                 </span>
               </div>
               <button
@@ -164,11 +170,11 @@ export const News: React.FC = () => {
               {/* Header Info */}
               <div className="flex items-center gap-3 text-sm font-medium text-slate-500 dark:text-slate-400 pb-6 border-b border-slate-100 dark:border-slate-800">
                 <Calendar size={16} weight="regular" />
-                <span>Publicado em {selectedNews.date}</span>
+                <span>Publicado em {formatDateForDisplay(selectedNews.date)}</span>
                 {selectedNews.type === 'edital' && (
                   <>
                     <span className="mx-2">•</span>
-                    <span className="text-purple-600 font-bold">Processo Seletivo</span>
+                    <span className="text-primary-600 font-bold">Processo Seletivo</span>
                   </>
                 )}
               </div>
@@ -192,7 +198,7 @@ export const News: React.FC = () => {
                   {selectedNews.timeline && selectedNews.timeline.length > 0 && (
                     <div className="space-y-4">
                       <h3 className="text-xl font-bold font-display flex items-center gap-2 text-slate-900 dark:text-white">
-                        <div className="p-2 rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                        <div className="p-2 rounded-lg bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
                           <Calendar size={20} weight="regular" />
                         </div>
                         Cronograma
@@ -200,8 +206,8 @@ export const News: React.FC = () => {
                       <div className="relative pl-4 border-l-2 border-slate-200 dark:border-slate-800 space-y-6">
                         {selectedNews.timeline.map((event, idx) => (
                           <div key={idx} className="relative">
-                            <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-purple-600 border-2 border-white dark:border-slate-950"></div>
-                            <span className="text-xs font-bold text-purple-600 dark:text-purple-400 block mb-1">{event.date}</span>
+                            <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-primary-600 border-2 border-white dark:border-slate-950"></div>
+                            <span className="text-xs font-bold text-primary-600 dark:text-primary-400 block mb-1">{formatDateForDisplay(event.date)}</span>
                             <h4 className="text-base font-bold font-display text-slate-900 dark:text-white">{event.title}</h4>
                             {event.description && <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{event.description}</p>}
                           </div>

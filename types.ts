@@ -53,6 +53,7 @@ export interface NewsItem {
   type?: 'news' | 'edital';
   content?: string;
   timeline?: TimelineEvent[];
+  attachments?: Attachment[];
 }
 
 export interface ChatMessage {

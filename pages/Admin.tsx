@@ -8,6 +8,7 @@ import { useToast } from '../contexts/ToastContext';
 import { NewsItem, TimelineEvent } from '../types';
 import { SquaresFour, FileText, BookOpen, Gear, Plus, Trash, PencilSimple, SignOut, X, FloppyDisk, WarningCircle, ShieldCheck, Stack, MagnifyingGlass, Funnel, Clock, Calendar, Link as LinkIcon, Download } from 'phosphor-react';
 import { Course } from '../types';
+import { formatDateForDisplay, normalizeDateToISO } from '../lib/date';
 
 export const Admin: React.FC = () => {
   const { news, courses, addNews, updateNews, deleteNews, addCourse, updateCourse, deleteCourse, isRemote, isLoadingNews, lastError } = useData();
@@ -17,36 +18,6 @@ export const Admin: React.FC = () => {
   const [newsSearch, setNewsSearch] = useState('');
   const [newsTypeFilter, setNewsTypeFilter] = useState<'todos' | 'news' | 'edital'>('todos');
   const [courseSearch, setCourseSearch] = useState('');
-
-  // Helper function to convert date from "DD de MMM de YYYY" to "YYYY-MM-DD"
-  const brazilianToISODate = (dateStr: string): string => {
-    try {
-      const monthMap: { [key: string]: string } = {
-        'jan': '01', 'fev': '02', 'mar': '03', 'abr': '04', 'mai': '05', 'jun': '06',
-        'jul': '07', 'ago': '08', 'set': '09', 'out': '10', 'nov': '11', 'dez': '12'
-      };
-      // Extract day, month, year from format like "23 de nov. de 2025"
-      const match = dateStr.match(/(\d+)\s+de\s+(\w+)\.?\s+de\s+(\d{4})/);
-      if (match) {
-        const [, day, monthStr, year] = match;
-        const monthNum = monthMap[monthStr.toLowerCase().substring(0, 3)];
-        return `${year}-${monthNum}-${day.padStart(2, '0')}`;
-      }
-      return dateStr; // Return as is if format doesn't match
-    } catch {
-      return dateStr;
-    }
-  };
-
-  // Helper function to convert date from "YYYY-MM-DD" to "DD de MMM de YYYY"
-  const isoToBrazilianDate = (dateStr: string): string => {
-    try {
-      const date = new Date(dateStr + 'T00:00:00');
-      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-    } catch {
-      return dateStr;
-    }
-  };
 
   // Form state for News
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -61,7 +32,8 @@ export const Admin: React.FC = () => {
     featured: false,
     type: 'news',
     content: '',
-    timeline: []
+    timeline: [],
+    attachments: []
   });
   // Form state for Courses
   const [isCourseFormOpen, setIsCourseFormOpen] = useState(false);
@@ -79,31 +51,34 @@ export const Admin: React.FC = () => {
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; targetId: string | null; type: 'news' | 'course' | null }>({ open: false, targetId: null, type: null });
 
   const handleOpenForm = (item?: NewsItem) => {
+    const normalizedDate = normalizeDateToISO(item?.date || '') || new Date().toISOString().split('T')[0];
     if (item) {
       setEditingId(item.id);
       setFormData({
         title: item.title,
-        date: brazilianToISODate(item.date), // Convert to ISO for date input
+        date: normalizedDate,
         summary: item.summary,
         category: item.category,
         image: item.image,
         featured: item.featured,
         type: item.type || 'news',
         content: item.content || '',
-        timeline: item.timeline || []
+        timeline: item.timeline || [],
+        attachments: item.attachments || []
       });
     } else {
       setEditingId(null);
       setFormData({
         title: '',
-        date: new Date().toISOString().split('T')[0],
+        date: normalizedDate,
         summary: '',
         category: 'Geral',
         image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80',
         featured: false,
         type: 'news',
         content: '',
-        timeline: []
+        timeline: [],
+        attachments: []
       });
     }
     setIsFormOpen(true);
@@ -115,19 +90,22 @@ export const Admin: React.FC = () => {
       addToast('Preencha título, resumo, data, categoria e imagem.', 'error');
       return;
     }
+    const normalizedDate = normalizeDateToISO(formData.date);
+    if (!normalizedDate) {
+      addToast('Data inválida. Escolha uma data válida.', 'error');
+      return;
+    }
     setIsSaving(true);
-    // Convert date from ISO to Brazilian format before saving
     const dataToSave = {
       ...formData,
-      date: isoToBrazilianDate(formData.date)
+      date: normalizedDate
     };
     const ok = editingId
       ? await updateNews({ ...dataToSave, id: editingId })
       : await addNews(dataToSave);
     setIsSaving(false);
-    if (ok) {
-      setIsFormOpen(false);
-    }
+    if (ok) setIsFormOpen(false);
+    else addToast('Erro ao salvar a notícia. Tente novamente.', 'error');
   };
 
   const handleOpenCourseForm = (item?: Course) => {
@@ -423,7 +401,7 @@ export const Admin: React.FC = () => {
                           {item.category}
                         </span>
                         <span className="pill pill-neutral text-xs flex items-center gap-1">
-                          <Calendar size={12} /> {item.date}
+                          <Calendar size={12} /> {formatDateForDisplay(item.date)}
                         </span>
                       </div>
                       <h3 className="font-bold font-display text-xl text-slate-900 dark:text-white mb-2 line-clamp-1">{item.title}</h3>
@@ -610,6 +588,21 @@ export const Admin: React.FC = () => {
                     placeholder="Digite um título impactante..."
                     disabled={isSaving}
                   />
+                </div>
+
+                {/* Summary */}
+                <div className="space-y-2.5">
+                  <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">
+                    Resumo breve
+                  </label>
+                  <textarea
+                    value={formData.summary}
+                    onChange={e => setFormData({ ...formData, summary: e.target.value })}
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 resize-none text-sm shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700"
+                    placeholder="Um resumo curto para aparecer na listagem..."
+                    disabled={isSaving}
+                  ></textarea>
                 </div>
 
                 {/* Category and Date */}

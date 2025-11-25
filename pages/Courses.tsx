@@ -83,13 +83,13 @@ export const Courses: React.FC = () => {
           </div>
 
           <div className="relative w-full md:w-80">
-            <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none" size={20} weight="regular" />
+            <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-700 dark:text-primary-300 drop-shadow-sm pointer-events-none transition-colors z-10" size={20} weight="bold" />
             <input
               type="text"
               placeholder="Buscar curso..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 rounded-full bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 shadow-sm text-sm font-medium"
+              className="peer w-full pl-11 pr-4 py-2.5 rounded-full bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white placeholder:text-slate-500/70 dark:placeholder:text-slate-400/70 shadow-sm text-sm font-medium"
             />
           </div>
         </GlassCard>

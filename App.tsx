@@ -18,6 +18,16 @@ const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m
 const Admin = lazy(() => import('./pages/Admin').then(m => ({ default: m.Admin })));
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
 
+const ScrollToTop: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [location.pathname, location.search, location.hash]);
+
+  return null;
+};
+
 const App: React.FC = () => {
   const [theme, setTheme] = useState<Theme>(() => {
     try {
@@ -74,6 +84,7 @@ const App: React.FC = () => {
       <ToastProvider>
         <DataProvider>
           <Router>
+            <ScrollToTop />
             <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans selection:bg-primary-500 selection:text-white">
               <Routes>
                 <Route path="/admin" element={

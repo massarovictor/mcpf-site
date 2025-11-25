@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { GlassButton } from '../components/GlassButton';
 import { GlassCard } from '../components/GlassCard';
 import { LiquidBackground } from '../components/LiquidBackground';
@@ -9,6 +9,7 @@ import { ArrowRight, InstagramLogo, Calendar, Briefcase, Monitor, Trophy, TrendU
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { NewsItem } from '../types';
+import { formatDateForDisplay, getDateTimestamp } from '../lib/date';
 
 const FALLBACK_INSTAGRAM = [
   'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
@@ -70,6 +71,10 @@ export const Home: React.FC = () => {
   const [instagramPosts, setInstagramPosts] = useState<InstagramPostData[]>([]);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const fallbackImage = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80';
+  const sortedNews = useMemo(
+    () => [...news].sort((a, b) => getDateTimestamp(b.date) - getDateTimestamp(a.date)),
+    [news]
+  );
 
   useEffect(() => {
     const fetchInsta = async () => {
@@ -124,7 +129,7 @@ export const Home: React.FC = () => {
   ];
 
   return (
-    <LiquidBackground className="pb-32">
+    <LiquidBackground className="pb-14">
       {/* Hero Section - Clean & Breathable */}
       <section className="relative pt-40 pb-16 md:pt-52 md:pb-20 min-h-[85vh] flex flex-col items-center justify-center">
         <div className="container mx-auto px-6 max-w-6xl relative z-10">
@@ -273,7 +278,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* Instagram Section */}
-      <section className="container mx-auto px-6 max-w-6xl py-32">
+      <section className="container mx-auto px-6 max-w-6xl pt-20 pb-6">
         <div className="flex flex-col md:flex-row items-center justify-between mb-20 gap-6">
            <div>
               <h2 className="section-title flex items-center gap-3">
@@ -310,8 +315,8 @@ export const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {news.slice(0, 3).map((item) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-start">
+          {sortedNews.slice(0, 3).map((item) => (
             <div key={item.id} className="group block h-full cursor-pointer" onClick={() => setSelectedNews(item)}>
               <GlassCard className="h-full overflow-hidden hover:bg-white/60 dark:hover:bg-slate-900/60 transition-colors">
                 <div className="relative h-48 overflow-hidden">
@@ -325,7 +330,7 @@ export const Home: React.FC = () => {
                 <div className="p-6 flex flex-col flex-grow">
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 mb-4">
                     <Calendar size={14} weight="regular" />
-                    <span>{item.date}</span>
+                    <span>{formatDateForDisplay(item.date)}</span>
                   </div>
                   
                   <h3 className="text-xl font-bold font-display text-slate-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors leading-tight">
@@ -341,7 +346,7 @@ export const Home: React.FC = () => {
           ))}
         </div>
         
-        <div className="mt-12 text-center">
+        <div className="mt-8 text-center">
           <Link to="/news">
             <GlassButton variant="ghost" icon={ArrowRight}>Ver todas as notícias</GlassButton>
           </Link>
@@ -361,12 +366,12 @@ export const Home: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent"></div>
               <div className="absolute top-6 left-6 flex gap-2">
-                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm ${selectedNews.type === 'edital' ? 'bg-purple-600' : 'bg-accent-500'}`}>
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm ${selectedNews.type === 'edital' ? 'bg-primary-600' : 'bg-accent-500'}`}>
                   <Tag size={12} className="text-white" />
                   {selectedNews.type === 'edital' ? 'EDITAL' : selectedNews.category}
                 </span>
                 <span className="px-3 py-1 rounded-full bg-white/90 text-xs font-bold text-slate-800 shadow-sm">
-                  {selectedNews.date}
+                  {formatDateForDisplay(selectedNews.date)}
                 </span>
               </div>
               <button
@@ -385,11 +390,11 @@ export const Home: React.FC = () => {
               {/* Header Info */}
               <div className="flex items-center gap-3 text-sm font-medium text-slate-500 dark:text-slate-400 pb-6 border-b border-slate-100 dark:border-slate-800">
                 <Calendar size={16} weight="regular" />
-                <span>Publicado em {selectedNews.date}</span>
+                <span>Publicado em {formatDateForDisplay(selectedNews.date)}</span>
                 {selectedNews.type === 'edital' && (
                   <>
                     <span className="mx-2">•</span>
-                    <span className="text-purple-600 font-bold">Processo Seletivo</span>
+                    <span className="text-primary-600 font-bold">Processo Seletivo</span>
                   </>
                 )}
               </div>
@@ -413,7 +418,7 @@ export const Home: React.FC = () => {
                   {selectedNews.timeline && selectedNews.timeline.length > 0 && (
                     <div className="space-y-4">
                       <h3 className="text-xl font-bold font-display flex items-center gap-2 text-slate-900 dark:text-white">
-                        <div className="p-2 rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                        <div className="p-2 rounded-lg bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
                           <Calendar size={20} weight="regular" />
                         </div>
                         Cronograma
@@ -421,8 +426,8 @@ export const Home: React.FC = () => {
                       <div className="relative pl-4 border-l-2 border-slate-200 dark:border-slate-800 space-y-6">
                         {selectedNews.timeline.map((event, idx) => (
                           <div key={idx} className="relative">
-                            <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-purple-600 border-2 border-white dark:border-slate-950"></div>
-                            <span className="text-xs font-bold text-purple-600 dark:text-purple-400 block mb-1">{event.date}</span>
+                            <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-primary-600 border-2 border-white dark:border-slate-950"></div>
+                            <span className="text-xs font-bold text-primary-600 dark:text-primary-400 block mb-1">{formatDateForDisplay(event.date)}</span>
                             <h4 className="text-base font-bold font-display text-slate-900 dark:text-white">{event.title}</h4>
                             {event.description && <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{event.description}</p>}
                           </div>

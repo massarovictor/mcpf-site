@@ -8,6 +8,7 @@ import { PaperPlaneTilt, Robot, BookOpen, Clock, WarningCircle, Sparkle, Plus, T
 import { useData } from '../contexts/DataContext';
 import { Skeleton } from '../components/Skeleton';
 import { useToast } from '../contexts/ToastContext';
+import { formatDateForDisplay, normalizeDateToISO } from '../lib/date';
 
 const DATA_ACTIVITY = [
   { name: 'Seg', hours: 4 },
@@ -44,7 +45,12 @@ export const Dashboard: React.FC = () => {
   const [isEditingCourse, setIsEditingCourse] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<Partial<Course>>({});
   const [isEditingNews, setIsEditingNews] = useState(false);
-  const [currentNews, setCurrentNews] = useState<Partial<NewsItem>>({ type: 'news', timeline: [], attachments: [] });
+  const [currentNews, setCurrentNews] = useState<Partial<NewsItem>>({
+    type: 'news',
+    date: new Date().toISOString().split('T')[0],
+    timeline: [],
+    attachments: []
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -98,18 +104,24 @@ export const Dashboard: React.FC = () => {
 
   // News Handlers
   const handleSaveNews = async () => {
-    if (!currentNews.title || !currentNews.summary) {
-      addToast('Preencha os campos obrigatórios', 'error');
+    if (!currentNews.title?.trim() || !currentNews.summary?.trim() || !currentNews.date || !currentNews.category?.trim() || !currentNews.image?.trim()) {
+      addToast('Preencha título, resumo, data, categoria e imagem.', 'error');
       return;
     }
+    const normalizedDate = normalizeDateToISO(currentNews.date);
+    if (!normalizedDate) {
+      addToast('Data inválida. Escolha uma data válida.', 'error');
+      return;
+    }
+    const payload = { ...currentNews, date: normalizedDate };
     const success = currentNews.id
-      ? await updateNews(currentNews as NewsItem)
-      : await addNews(currentNews as Omit<NewsItem, 'id'>);
+      ? await updateNews(payload as NewsItem)
+      : await addNews(payload as Omit<NewsItem, 'id'>);
 
     if (success) {
       addToast(currentNews.id ? 'Notícia atualizada!' : 'Notícia criada!', 'success');
       setIsEditingNews(false);
-      setCurrentNews({ type: 'news', timeline: [], attachments: [] });
+      setCurrentNews({ type: 'news', date: new Date().toISOString().split('T')[0], timeline: [], attachments: [] });
     } else {
       addToast('Erro ao salvar notícia', 'error');
     }
@@ -417,7 +429,13 @@ export const Dashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gerenciar Notícias e Editais</h2>
-            <GlassButton onClick={() => { setCurrentNews({ type: 'news', timeline: [], attachments: [] }); setIsEditingNews(true); }} icon={Plus}>
+            <GlassButton
+              onClick={() => {
+                setCurrentNews({ type: 'news', date: new Date().toISOString().split('T')[0], timeline: [], attachments: [] });
+                setIsEditingNews(true);
+              }}
+              icon={Plus}
+            >
               Nova Publicação
             </GlassButton>
           </div>
@@ -596,16 +614,26 @@ export const Dashboard: React.FC = () => {
                     <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded-lg" />
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${item.type === 'edital' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${item.type === 'edital' ? 'bg-primary-100 text-primary-700' : 'bg-accent-100 text-accent-700'}`}>
                           {item.type === 'edital' ? 'EDITAL' : 'NOTÍCIA'}
                         </span>
-                        <span className="text-xs text-slate-500">{item.date}</span>
+                        <span className="text-xs text-slate-500">{formatDateForDisplay(item.date)}</span>
                       </div>
                       <h3 className="font-bold text-base line-clamp-2">{item.title}</h3>
                     </div>
                   </div>
                   <div className="flex justify-end gap-2 mt-4">
-                    <GlassButton size="sm" variant="ghost" onClick={() => { setCurrentNews(item); setIsEditingNews(true); }} icon={PencilSimple}>Editar</GlassButton>
+                    <GlassButton
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setCurrentNews({ ...item, date: normalizeDateToISO(item.date) || '' });
+                        setIsEditingNews(true);
+                      }}
+                      icon={PencilSimple}
+                    >
+                      Editar
+                    </GlassButton>
                     <GlassButton size="sm" variant="ghost" className="text-red-500 hover:bg-red-50" onClick={() => handleDeleteNews(item.id)} icon={Trash}>Excluir</GlassButton>
                   </div>
                 </GlassCard>
