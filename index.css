@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 leading-relaxed;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-slate-900 dark:text-white;
+  }
+
+  h1 { @apply text-4xl md:text-5xl font-bold; }
+  h2 { @apply text-3xl md:text-4xl font-semibold; }
+  h3 { @apply text-2xl font-semibold; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-700/30;
+  }
+
+  .glass-card {
+    @apply glass rounded-xl shadow-glass hover:shadow-xl transition-all duration-300;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400;
+  }
+}
+
+@layer components {
+  .pill {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide;
+  }
+  .pill-primary {
+    @apply pill bg-primary-500/10 text-primary-700 dark:text-primary-300 border border-primary-500/20;
+  }
+  .pill-accent {
+    @apply pill bg-accent-500/10 text-accent-700 dark:text-accent-300 border border-accent-500/20;
+  }
+  .pill-neutral {
+    @apply pill bg-white/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border border-white/20 dark:border-slate-800;
+  }
+  .section-title {
+    @apply text-3xl md:text-4xl font-display font-bold text-slate-900 dark:text-white tracking-tight;
+  }
+  .section-subtitle {
+    @apply text-lg text-slate-600 dark:text-slate-300;
+  }
+  .section-divider {
+    @apply w-20 h-1 bg-gradient-to-r from-primary-500 to-accent-500 mx-auto rounded-full;
+  }
+}

@@ -1,0 +1,13 @@
+# robots.txt for EEEP Maria Célia
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /login
+
+Sitemap: https://eeepmariacelia.com.br/sitemap.xml
+
+
+
+
+
