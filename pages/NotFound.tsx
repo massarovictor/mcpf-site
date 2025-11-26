@@ -1,16 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { LiquidBackground } from '../components/LiquidBackground';
-import { GlassButton } from '../components/GlassButton';
-import { GlassCard } from '../components/GlassCard';
-import { House, MagnifyingGlass } from 'phosphor-react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { Link } from "react-router-dom";
+import { LiquidBackground } from "../components/LiquidBackground";
+import { GlassButton } from "../components/GlassButton";
+import { GlassCard } from "../components/GlassCard";
+import { House, MagnifyingGlass } from "phosphor-react";
+import { motion } from "framer-motion";
 
 export const NotFound: React.FC = () => {
   return (
     <div className="min-h-screen relative flex items-center justify-center">
       <LiquidBackground className="absolute inset-0 !min-h-full" />
-      
+
       <div className="container mx-auto px-6 max-w-4xl relative z-10">
         <GlassCard className="p-12 md:p-16 text-center rounded-3xl">
           <motion.div
@@ -23,15 +23,15 @@ export const NotFound: React.FC = () => {
                 404
               </span>
             </div>
-            
+
             <h1 className="text-3xl md:text-4xl font-bold font-display text-slate-900 dark:text-white mb-4">
               Página Não Encontrada
             </h1>
-            
+
             <p className="text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-md mx-auto">
               A página que você procura não existe ou foi movida.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/">
                 <GlassButton variant="primary" size="lg" icon={House}>
@@ -39,7 +39,11 @@ export const NotFound: React.FC = () => {
                 </GlassButton>
               </Link>
               <Link to="/courses">
-                <GlassButton variant="secondary" size="lg" icon={MagnifyingGlass}>
+                <GlassButton
+                  variant="secondary"
+                  size="lg"
+                  icon={MagnifyingGlass}
+                >
                   Ver Cursos
                 </GlassButton>
               </Link>
@@ -50,8 +54,3 @@ export const NotFound: React.FC = () => {
     </div>
   );
 };
-
-
-
-
-

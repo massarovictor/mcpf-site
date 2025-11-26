@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion, HTMLMotionProps } from 'framer-motion';
-import { cn } from '../lib/utils';
+import React from "react";
+import { motion, HTMLMotionProps } from "framer-motion";
+import { cn } from "../lib/utils";
 
 interface GlassCardProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
@@ -8,11 +8,11 @@ interface GlassCardProps extends HTMLMotionProps<"div"> {
   hoverEffect?: boolean;
 }
 
-export const GlassCard: React.FC<GlassCardProps> = ({ 
-  children, 
-  className, 
+export const GlassCard: React.FC<GlassCardProps> = ({
+  children,
+  className,
   hoverEffect = true,
-  ...props 
+  ...props
 }) => {
   return (
     <motion.div
@@ -23,19 +23,16 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         // Base Glass Styles
         "group relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl shadow-glass dark:shadow-none",
         // Hover Effects (Optional)
-        hoverEffect && "transition-all duration-300 hover:bg-white/50 dark:hover:bg-slate-900/50 hover:shadow-glass-lg hover:scale-[1.01] hover:border-white/30",
-        className
+        hoverEffect &&
+          "transition-all duration-300 hover:bg-white/50 dark:hover:bg-slate-900/50 hover:shadow-glass-lg hover:scale-[1.01] hover:border-white/30",
+        className,
       )}
       {...props}
     >
       {/* Shine Effect Overlay */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
-      
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
+
       {children}
     </motion.div>
   );
 };
-
-
-
-
