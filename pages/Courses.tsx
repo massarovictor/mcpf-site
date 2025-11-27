@@ -46,8 +46,8 @@ export const Courses: React.FC = () => {
   return (
     <LiquidBackground className="pb-24">
       {/* Centralized Hero Section - Liquid Glass Style */}
-      <section className="relative pt-40 pb-24 overflow-hidden flex items-center justify-center min-h-[60vh]">
-        <div className="container mx-auto px-6 text-center relative z-10 max-w-4xl">
+      <section className="relative pt-28 pb-14 sm:pt-32 sm:pb-18 md:pt-44 md:pb-20 overflow-hidden flex items-center justify-center min-h-[65vh]">
+        <div className="container mx-auto px-4 sm:px-6 text-center relative z-10 max-w-4xl">
           <div className="flex flex-col items-center">
             {/* Badge */}
             <motion.div
@@ -65,7 +65,7 @@ export const Courses: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="section-title text-5xl md:text-7xl leading-[1.1] mb-8"
+              className="section-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] mb-6 md:mb-8"
             >
               Cursos Técnicos <br className="md:hidden" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-teal-500">
@@ -78,7 +78,7 @@ export const Courses: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="section-subtitle max-w-3xl mx-auto"
+              className="section-subtitle max-w-3xl mx-auto px-2"
             >
               Prepare-se para a vida e para um futuro de realizações com nossos
               cursos de excelência.
@@ -87,9 +87,9 @@ export const Courses: React.FC = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-6 max-w-6xl py-20">
+      <div className="container mx-auto px-4 sm:px-6 max-w-6xl py-14 sm:py-18 md:py-20">
         {/* Controls */}
-        <GlassCard className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 sticky top-24 z-30 p-4 rounded-full">
+        <GlassCard className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 mb-10 md:mb-12 md:sticky md:top-24 z-30 p-4 sm:p-6 rounded-2xl md:rounded-full">
           <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
             {categories.map((cat) => (
               <button
@@ -124,14 +124,14 @@ export const Courses: React.FC = () => {
         </GlassCard>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
           {filteredCourses.map((course) => (
             <GlassCard
               key={course.id}
               hoverEffect
               className="group flex flex-col h-full border-slate-200 dark:border-slate-800 hover:shadow-xl hover:shadow-primary-900/5 transition-all duration-500"
             >
-              <div className="relative h-64 overflow-hidden">
+              <div className="relative h-56 sm:h-64 overflow-hidden">
                 <img
                   src={course.image}
                   alt={course.title}
@@ -150,11 +150,11 @@ export const Courses: React.FC = () => {
                   {course.category}
                 </div>
               </div>
-              <div className="p-8 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold font-display text-slate-900 dark:text-white mb-3 group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
+              <div className="p-6 sm:p-8 flex flex-col flex-grow">
+                <h3 className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white mb-3 group-hover:text-primary-700 dark:group-hover:text-primary-400 transition-colors">
                   {course.title}
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-8 flex-grow leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-6 sm:mb-8 flex-grow leading-relaxed">
                   {course.description}
                 </p>
                 <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">

@@ -26,8 +26,8 @@ export const About: React.FC = () => {
   return (
     <LiquidBackground className="pb-24">
       {/* Centralized Hero Section - Liquid Glass Style */}
-      <section className="relative pt-40 pb-24 overflow-hidden flex items-center justify-center min-h-[60vh]">
-        <div className="container mx-auto px-6 text-center relative z-10 max-w-4xl">
+      <section className="relative pt-28 pb-14 sm:pt-32 sm:pb-18 md:pt-44 md:pb-20 overflow-hidden flex items-center justify-center min-h-[65vh]">
+        <div className="container mx-auto px-4 sm:px-6 text-center relative z-10 max-w-4xl">
           <div className="flex flex-col items-center">
             {/* Badge */}
             <motion.div 

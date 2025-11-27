@@ -28,8 +28,8 @@ export const Contact: React.FC = () => {
       <LiquidBackground className="absolute inset-0 !min-h-full" />
       
       {/* Hero Section */}
-      <section className="relative pt-40 pb-20 overflow-hidden">
-        <div className="container mx-auto px-6 max-w-6xl relative z-10">
+      <section className="relative pt-28 pb-14 sm:pt-32 sm:pb-18 md:pt-44 md:pb-20 overflow-hidden min-h-[65vh] flex items-center">
+        <div className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
           <div className="text-center space-y-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -45,7 +45,7 @@ export const Contact: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="section-title text-5xl md:text-6xl lg:text-7xl leading-[1.1]"
+              className="section-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1]"
             >
               Vamos{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-teal-500">

@@ -10,7 +10,7 @@ export const LiquidBackground: React.FC<LiquidBackgroundProps> = ({ className, c
   return (
     <div className={cn("relative min-h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950", className)}>
       {/* Animated Blobs */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 hidden md:block">
         {/* Primary Blob - Top Left */}
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary-400/30 dark:bg-primary-600/20 mix-blend-multiply dark:mix-blend-screen filter blur-[80px] animate-blob opacity-70" />
         

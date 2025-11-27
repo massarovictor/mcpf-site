@@ -166,9 +166,9 @@ export const Home: React.FC = () => {
   return (
     <LiquidBackground className="pb-14">
       {/* Hero Section - Clean & Breathable */}
-      <section className="relative pt-40 pb-16 md:pt-52 md:pb-20 min-h-[85vh] flex flex-col items-center justify-center">
-        <div className="container mx-auto px-6 max-w-6xl relative z-10">
-          <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-24">
+      <section className="relative pt-28 pb-14 sm:pt-32 sm:pb-18 md:pt-44 md:pb-20 min-h-[65vh] flex flex-col items-center justify-center">
+        <div className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-16 md:mb-24">
             {/* Tagline Badge */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -185,7 +185,7 @@ export const Home: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-6xl md:text-8xl font-bold font-display text-slate-900 dark:text-white leading-[1.05] tracking-tight mb-8"
+              className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold font-display text-slate-900 dark:text-white leading-[1.05] tracking-tight mb-6 md:mb-8"
             >
               Escola de <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-teal-500">
@@ -198,7 +198,7 @@ export const Home: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal mb-12"
+              className="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal mb-10 md:mb-12 px-2"
             >
               Comprometida com a formação integral dos alunos e com a construção
               de um futuro de realizações profissionais e acadêmicas.
@@ -209,13 +209,13 @@ export const Home: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full sm:w-auto"
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full sm:w-auto"
             >
               <Link to="/courses">
                 <GlassButton
                   size="lg"
                   variant="primary"
-                  className="w-full sm:w-auto px-10 py-4 text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
+                  className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
                 >
                   Conheça Nossos Cursos
                 </GlassButton>
@@ -224,7 +224,7 @@ export const Home: React.FC = () => {
           </div>
 
           {/* Highlights - Floating Icons (No Heavy Cards) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 text-center">
             {HIGHLIGHTS.map((item, index) => (
               <motion.div
                 key={index}
@@ -259,7 +259,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* Eixos Tecnológicos Section */}
-      <section className="container mx-auto px-6 max-w-6xl py-32 relative z-10">
+      <section className="container mx-auto px-4 sm:px-6 max-w-6xl py-20 md:py-32 relative z-10">
         <div className="text-center mb-20">
           <h2 className="section-title text-center mb-4">Eixos Tecnológicos</h2>
           <div className="section-divider mb-6"></div>
@@ -268,7 +268,7 @@ export const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {/* Gestão e Negócios */}
           <GlassCard className="h-full p-8 hover:bg-white/60 dark:hover:bg-slate-900/60 transition-colors">
             <div className="w-16 h-16 rounded-full bg-accent-50 dark:bg-accent-900/20 text-accent-600 dark:text-accent-400 flex items-center justify-center mb-6">
@@ -332,7 +332,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* Instagram Section */}
-      <section className="container mx-auto px-6 max-w-6xl pt-20 pb-6">
+      <section className="container mx-auto px-4 sm:px-6 max-w-6xl pt-16 md:pt-20 pb-6">
         <div className="flex flex-col md:flex-row items-center justify-between mb-20 gap-6">
           <div>
             <h2 className="section-title flex items-center gap-3">
@@ -352,7 +352,7 @@ export const Home: React.FC = () => {
           </a>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
           {instagramPosts.map((post, index) => (
             <InstagramPost key={`ig-${index}`} post={post} index={index} />
           ))}
@@ -360,7 +360,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* News Preview */}
-      <section className="container mx-auto px-6 max-w-6xl py-32">
+      <section className="container mx-auto px-4 sm:px-6 max-w-6xl py-20 md:py-32">
         <div className="text-center mb-20">
           <div className="pill pill-primary mb-4 bg-white/80 dark:bg-slate-900/80">
             <span className="w-2 h-2 rounded-full bg-primary-500"></span>
@@ -374,7 +374,7 @@ export const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-start">
           {sortedNews.slice(0, 3).map((item) => (
             <div
               key={item.id}

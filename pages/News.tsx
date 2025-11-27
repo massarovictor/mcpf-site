@@ -49,8 +49,8 @@ export const News: React.FC = () => {
   return (
     <LiquidBackground className="pb-24">
       {/* Centralized Hero Section */}
-      <section className="relative pt-40 pb-24 overflow-hidden flex items-center justify-center min-h-[50vh]">
-        <div className="container mx-auto px-6 text-center relative z-10 max-w-4xl">
+      <section className="relative pt-28 pb-14 sm:pt-32 sm:pb-18 md:pt-44 md:pb-20 overflow-hidden flex items-center justify-center min-h-[65vh]">
+        <div className="container mx-auto px-4 sm:px-6 text-center relative z-10 max-w-4xl">
           <div className="flex flex-col items-center">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -65,7 +65,7 @@ export const News: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="section-title text-5xl md:text-7xl leading-[1.1] mb-8"
+              className="section-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] mb-6 md:mb-8"
             >
               Notícias &{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-teal-500">
@@ -76,7 +76,7 @@ export const News: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="section-subtitle max-w-3xl mx-auto"
+              className="section-subtitle max-w-3xl mx-auto px-2"
             >
               Acompanhe os processos seletivos, eventos culturais e conquistas
               acadêmicas.
@@ -85,9 +85,9 @@ export const News: React.FC = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-6 max-w-6xl py-20">
+      <div className="container mx-auto px-4 sm:px-6 max-w-6xl py-20">
         {/* Filters & Search */}
-        <GlassCard className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12 sticky top-24 z-30 p-4 rounded-full">
+        <GlassCard className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 mb-10 md:mb-12 md:sticky md:top-24 z-30 p-4 sm:p-6 rounded-2xl md:rounded-full">
           <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
             {categories.map((cat) => (
               <button
@@ -122,7 +122,7 @@ export const News: React.FC = () => {
         </GlassCard>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredNews.length > 0 ? (
             filteredNews.map((item) => (
               <GlassCard
@@ -335,3 +335,6 @@ export const News: React.FC = () => {
     </LiquidBackground>
   );
 };
+
+
+

@@ -7,13 +7,13 @@ export const Faculty: React.FC = () => {
   return (
     <div className="pb-24">
       {/* Centralized Hero Section */}
-      <section className="relative pt-40 pb-20 overflow-hidden flex items-center justify-center min-h-[50vh]">
+      <section className="relative pt-28 pb-14 sm:pt-32 sm:pb-18 md:pt-44 md:pb-20 overflow-hidden flex items-center justify-center min-h-[65vh]">
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] bg-accent-500/5 dark:bg-accent-500/10 rounded-full blur-3xl"></div>
           <div className="absolute top-0 left-0 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl -translate-x-1/4 -translate-y-1/4"></div>
         </div>
 
-        <div className="container mx-auto px-6 text-center relative z-10 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 text-center relative z-10 max-w-4xl">
           <div className="animate-in slide-in-from-bottom-10 duration-700 fade-in space-y-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-accent-200 dark:border-accent-900/30 shadow-sm mx-auto">
               <span className="w-2.5 h-2.5 rounded-full bg-accent-500"></span>
