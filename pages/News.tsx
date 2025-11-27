@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useData } from "../contexts/DataContext";
 import { GlassCard } from "../components/GlassCard";
 import { GlassButton } from "../components/GlassButton";
@@ -172,8 +173,10 @@ export const News: React.FC = () => {
       </div>
 
       {/* Modal de detalhes da notícia */}
-      {selectedNews && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md px-4 animate-in fade-in duration-200">
+      {selectedNews &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-md px-4 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 max-w-4xl w-full overflow-hidden max-h-[85vh] flex flex-col">
             <div className="relative h-64 shrink-0">
               <img
@@ -326,8 +329,9 @@ export const News: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+        )}
     </LiquidBackground>
   );
 };

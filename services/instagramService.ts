@@ -1,4 +1,4 @@
-import { INSTAGRAM_ACCESS_TOKEN } from '../constants';
+import { INSTAGRAM_TOKEN } from '../constants';
 
 interface InstagramMedia {
   id: string;
@@ -19,7 +19,7 @@ const isVideoUrl = (url: string): boolean => {
 };
 
 export const getInstagramPosts = async (): Promise<InstagramPost[]> => {
-  const token = INSTAGRAM_ACCESS_TOKEN as string;
+  const token = INSTAGRAM_TOKEN as string;
   
   if (!token || token.includes('COLE_AQUI') || token.trim() === '') {
     console.log('Instagram token not configured.');

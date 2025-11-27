@@ -2,10 +2,11 @@ import { NavItem, Course, FacultyMember, NewsItem } from './types';
 
 // ==============================================================================
 // CONFIGURAÇÃO DO INSTAGRAM
-// Defina VITE_INSTAGRAM_ACCESS_TOKEN no .env.local (token do Graph API).
+// Defina VITE_INSTAGRAM_TOKEN no .env (token do Graph API).
 // Se deixar vazio, o site mostrará imagens ilustrativas automaticamente.
 // ==============================================================================
-export const INSTAGRAM_ACCESS_TOKEN = import.meta.env.VITE_INSTAGRAM_ACCESS_TOKEN ?? '';
+// Instagram envs (token opcional, profile com fallback)
+export const INSTAGRAM_TOKEN = import.meta.env.VITE_INSTAGRAM_TOKEN ?? '';
 export const INSTAGRAM_PROFILE = import.meta.env.VITE_INSTAGRAM_PROFILE || 'eeepmariacelia'; // usado para o link "Seguir"
 
 export const NAV_ITEMS: NavItem[] = [
@@ -198,3 +199,4 @@ A prova de seleção ocorrerá no dia 15 de janeiro de 2026. O resultado prelimi
     type: 'news'
   }
 ];
+
