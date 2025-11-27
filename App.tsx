@@ -13,6 +13,7 @@ import { About } from "./pages/About";
 import { Courses } from "./pages/Courses";
 import { Contact } from "./pages/Contact";
 import { News } from "./pages/News";
+import { BreakingAlert } from "./components/BreakingAlert";
 import { NotFound } from "./pages/NotFound";
 import { Theme } from "./types";
 import { DataProvider } from "./contexts/DataContext";
@@ -104,6 +105,7 @@ const App: React.FC = () => {
         <DataProvider>
           <Router>
             <ScrollToTop />
+            <BreakingAlert />
             <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans selection:bg-primary-500 selection:text-white">
               <Routes>
                 <Route

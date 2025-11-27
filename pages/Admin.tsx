@@ -1,20 +1,22 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { GlassCard } from '../components/GlassCard';
 import { GlassButton } from '../components/GlassButton';
 import { LiquidBackground } from '../components/LiquidBackground';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { NewsItem, TimelineEvent } from '../types';
-import { SquaresFour, FileText, BookOpen, Gear, Plus, Trash, PencilSimple, SignOut, X, FloppyDisk, WarningCircle, ShieldCheck, Stack, MagnifyingGlass, Funnel, Clock, Calendar, Link as LinkIcon, Download } from 'phosphor-react';
+import { Alert, NewsItem, TimelineEvent } from '../types';
+import { SquaresFour, FileText, BookOpen, Gear, Plus, Trash, PencilSimple, SignOut, X, FloppyDisk, WarningCircle, ShieldCheck, Stack, MagnifyingGlass, Funnel, Clock, Calendar, Link as LinkIcon, Download, MegaphoneSimple, CheckCircle } from 'phosphor-react';
 import { Course } from '../types';
 import { formatDateForDisplay, normalizeDateToISO } from '../lib/date';
+import { fetchAlerts, createAlert, updateAlert, deleteAlert } from '../services/alertsService';
+import { hasSupabase } from '../services/supabaseClient';
 
 export const Admin: React.FC = () => {
   const { news, courses, addNews, updateNews, deleteNews, addCourse, updateCourse, deleteCourse, isRemote, isLoadingNews, lastError } = useData();
   const { signOut, user } = useAuth();
   const { addToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'news' | 'courses'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'news' | 'courses' | 'alerts'>('dashboard');
   const [newsSearch, setNewsSearch] = useState('');
   const [newsTypeFilter, setNewsTypeFilter] = useState<'todos' | 'news' | 'edital'>('todos');
   const [courseSearch, setCourseSearch] = useState('');
@@ -48,7 +50,31 @@ export const Admin: React.FC = () => {
     modules: [],
     opportunities: []
   });
-  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; targetId: string | null; type: 'news' | 'course' | null }>({ open: false, targetId: null, type: null });
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; targetId: string | null; type: 'news' | 'course' | 'alert' | null }>({ open: false, targetId: null, type: null });
+
+  // Alerts state
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [isLoadingAlerts, setIsLoadingAlerts] = useState<boolean>(hasSupabase);
+  const [isSavingAlert, setIsSavingAlert] = useState(false);
+  const [alertFormOpen, setAlertFormOpen] = useState(false);
+  const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
+  const toDateTimeLocal = (d: Date) => {
+    const offset = d.getTimezoneOffset();
+    const local = new Date(d.getTime() - offset * 60000);
+    return local.toISOString().slice(0, 16);
+  };
+  const defaultStart = toDateTimeLocal(new Date());
+  const defaultEnd = toDateTimeLocal(new Date(Date.now() + 4 * 60 * 60 * 1000));
+  const [alertForm, setAlertForm] = useState<Omit<Alert, 'id' | 'createdAt'>>({
+    title: '',
+    message: '',
+    level: 'urgent',
+    startAt: defaultStart,
+    endAt: defaultEnd,
+    isActive: true,
+    ctaLabel: '',
+    ctaUrl: ''
+  });
 
   const handleOpenForm = (item?: NewsItem) => {
     const normalizedDate = normalizeDateToISO(item?.date || '') || new Date().toISOString().split('T')[0];
@@ -137,6 +163,52 @@ export const Admin: React.FC = () => {
     setIsCourseFormOpen(true);
   };
 
+  const loadAlerts = async () => {
+    if (!hasSupabase) {
+      setIsLoadingAlerts(false);
+      return;
+    }
+    setIsLoadingAlerts(true);
+    const res = await fetchAlerts();
+    if (res.data) setAlerts(res.data);
+    if (res.error) addToast(res.error, 'error');
+    setIsLoadingAlerts(false);
+  };
+
+  useEffect(() => {
+    loadAlerts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleOpenAlertForm = (item?: Alert) => {
+    if (item) {
+      setEditingAlertId(item.id);
+      setAlertForm({
+        title: item.title,
+        message: item.message,
+        level: item.level,
+        startAt: item.startAt ? toDateTimeLocal(new Date(item.startAt)) : defaultStart,
+        endAt: item.endAt ? toDateTimeLocal(new Date(item.endAt)) : '',
+        isActive: item.isActive,
+        ctaLabel: item.ctaLabel || '',
+        ctaUrl: item.ctaUrl || ''
+      });
+    } else {
+      setEditingAlertId(null);
+      setAlertForm({
+        title: '',
+        message: '',
+        level: 'urgent',
+        startAt: defaultStart,
+        endAt: defaultEnd,
+        isActive: true,
+        ctaLabel: '',
+        ctaUrl: ''
+      });
+    }
+    setAlertFormOpen(true);
+  };
+
   const filteredNews = useMemo(() => {
     const term = newsSearch.toLowerCase().trim();
     return news.filter(item => {
@@ -188,8 +260,11 @@ export const Admin: React.FC = () => {
     setIsSaving(true);
     if (confirmDialog.type === 'course') {
       await deleteCourse(confirmDialog.targetId);
-    } else {
+    } else if (confirmDialog.type === 'news') {
       await deleteNews(confirmDialog.targetId);
+    } else if (confirmDialog.type === 'alert') {
+      await deleteAlert(confirmDialog.targetId);
+      await loadAlerts();
     }
     setIsSaving(false);
     setConfirmDialog({ open: false, targetId: null, type: null });
@@ -201,6 +276,49 @@ export const Admin: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     setConfirmDialog({ open: true, targetId: id, type: 'news' });
+  };
+
+  const handleDeleteAlert = async (id: string) => {
+    setConfirmDialog({ open: true, targetId: id, type: 'alert' });
+  };
+
+  const handleSubmitAlert = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!hasSupabase) {
+      addToast('Supabase não configurado para salvar alertas.', 'error');
+      return;
+    }
+    if (!alertForm.title.trim() || !alertForm.message.trim() || !alertForm.startAt) {
+      addToast('Preencha título, mensagem e horários do alerta.', 'error');
+      return;
+    }
+    const startISO = new Date(alertForm.startAt).toISOString();
+    const endISO = alertForm.endAt ? new Date(alertForm.endAt).toISOString() : null;
+    if (endISO && new Date(startISO) >= new Date(endISO)) {
+      addToast('O término deve ser após o início.', 'error');
+      return;
+    }
+
+    const payload = {
+      ...alertForm,
+      startAt: startISO,
+      endAt: endISO
+    };
+
+    setIsSavingAlert(true);
+    const result = editingAlertId
+      ? await updateAlert({ ...payload, id: editingAlertId })
+      : await createAlert(payload);
+
+    if (result.error) {
+      addToast(result.error, 'error');
+    } else {
+      addToast('Alerta salvo com sucesso.', 'success');
+      setAlertFormOpen(false);
+      setEditingAlertId(null);
+      await loadAlerts();
+    }
+    setIsSavingAlert(false);
   };
 
   return (
@@ -233,6 +351,12 @@ export const Admin: React.FC = () => {
             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-full font-bold text-sm transition-all duration-200 ${activeTab === 'courses' ? 'bg-primary-500/10 text-primary-700 dark:text-primary-400 border border-primary-500/20 shadow-sm translate-x-1' : 'text-slate-600 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'}`}
           >
             <BookOpen size={20} weight="regular" /> Gerenciar Cursos
+          </button>
+          <button
+            onClick={() => setActiveTab('alerts')}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-full font-bold text-sm transition-all duration-200 ${activeTab === 'alerts' ? 'bg-primary-500/10 text-primary-700 dark:text-primary-400 border border-primary-500/20 shadow-sm translate-x-1' : 'text-slate-600 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'}`}
+          >
+            <MegaphoneSimple size={20} weight="regular" /> Alertas Urgentes
           </button>
         </nav>
         <div className="p-6 border-t border-white/10 dark:border-white/5">
@@ -494,6 +618,102 @@ export const Admin: React.FC = () => {
                 ))
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'alerts' && (
+          <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in duration-500">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white font-display">Alertas urgentes</h1>
+                <p className="text-slate-500 mt-2 text-lg">Configure avisos rápidos com janela de início e fim.</p>
+              </div>
+              <GlassButton size="lg" icon={Plus} onClick={() => handleOpenAlertForm()} variant="primary" className="shadow-lg" disabled={isSavingAlert || !hasSupabase}>
+                Novo alerta
+              </GlassButton>
+            </div>
+
+            {!hasSupabase && (
+              <GlassCard className="p-6 rounded-3xl border border-amber-200 dark:border-amber-900/30 bg-amber-50/70 dark:bg-amber-900/10 text-amber-800 dark:text-amber-100">
+                Para salvar alertas, configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.
+              </GlassCard>
+            )}
+
+            {isLoadingAlerts ? (
+              <div className="text-center py-12 text-slate-500">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Carregando alertas...</span>
+                </div>
+              </div>
+            ) : alerts.length === 0 ? (
+              <GlassCard className="p-6 text-center rounded-3xl">
+                <p className="text-slate-600 dark:text-slate-300">Nenhum alerta cadastrado.</p>
+                <p className="text-sm text-slate-500 mt-1">Use “Novo alerta” para publicar uma notificação urgente.</p>
+              </GlassCard>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {alerts.map(alert => {
+                  const now = Date.now();
+                  const start = alert.startAt ? new Date(alert.startAt).getTime() : 0;
+                  const end = alert.endAt ? new Date(alert.endAt).getTime() : Number.POSITIVE_INFINITY;
+                  let status: 'programado' | 'ativo' | 'expirado' | 'inativo' = 'inativo';
+                  if (!alert.isActive) status = 'inativo';
+                  else if (now < start) status = 'programado';
+                  else if (now > end) status = 'expirado';
+                  else status = 'ativo';
+                  const statusStyle =
+                    status === 'ativo'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 border-green-200 dark:border-green-800'
+                      : status === 'programado'
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 border-blue-200 dark:border-blue-800'
+                        : status === 'expirado'
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+                  return (
+                    <GlassCard key={alert.id} className="p-6 rounded-3xl flex flex-col gap-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[11px] font-bold tracking-wide ${
+                              alert.level === 'urgent'
+                                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 border-red-200 dark:border-red-800'
+                                : alert.level === 'warning'
+                                  ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800'
+                                  : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800'
+                            }`}
+                          >
+                            <MegaphoneSimple size={14} weight="regular" /> {alert.level === 'urgent' ? 'Urgente' : alert.level === 'warning' ? 'Aviso' : 'Info'}
+                          </span>
+                          <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[11px] font-bold tracking-wide ${statusStyle}`}>{status.toUpperCase()}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <GlassButton variant="ghost" icon={PencilSimple} onClick={() => handleOpenAlertForm(alert)} className="h-10" />
+                          <GlassButton variant="ghost" icon={Trash} onClick={() => handleDeleteAlert(alert.id)} className="h-10 text-red-500 hover:text-red-600" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white">{alert.title}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 line-clamp-3">{alert.message}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                          <Clock size={12} weight="regular" /> Início: {alert.startAt ? formatDateForDisplay(alert.startAt) : '—'}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                          <Calendar size={12} weight="regular" /> Fim: {alert.endAt ? formatDateForDisplay(alert.endAt) : '—'}
+                        </span>
+                        {alert.ctaUrl && alert.ctaLabel && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800">
+                            <LinkIcon size={12} weight="regular" /> CTA: {alert.ctaLabel}
+                          </span>
+                        )}
+                      </div>
+                    </GlassCard>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -840,6 +1060,155 @@ export const Admin: React.FC = () => {
         </>
       )}
 
+      {/* Alert modal */}
+      {alertFormOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+          <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onClick={() => setAlertFormOpen(false)} />
+          <form onSubmit={handleSubmitAlert} className="relative bg-white dark:bg-slate-950 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-3xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between gap-3 px-6 sm:px-8 py-4 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-primary-50 to-white dark:from-slate-900 dark:to-slate-950">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-primary-600 dark:text-primary-300 font-bold">Alerta urgente</p>
+                <h2 className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white">
+                  {editingAlertId ? 'Editar alerta' : 'Novo alerta'}
+                </h2>
+              </div>
+              <button type="button" onClick={() => setAlertFormOpen(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500">
+                <X size={18} weight="bold" />
+              </button>
+            </div>
+
+            <div className="p-6 sm:p-8 space-y-5 overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Título</label>
+                  <input
+                    type="text"
+                    value={alertForm.title}
+                    onChange={e => setAlertForm({ ...alertForm, title: e.target.value })}
+                    required
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white shadow-sm"
+                    placeholder="Alerta rápido"
+                    disabled={isSavingAlert}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Nível</label>
+                  <div className="relative">
+                    <select
+                      value={alertForm.level}
+                      onChange={e => setAlertForm({ ...alertForm, level: e.target.value as Alert['level'] })}
+                      className="w-full appearance-none px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white shadow-sm"
+                      disabled={isSavingAlert}
+                    >
+                      <option value="urgent">Urgente</option>
+                      <option value="warning">Aviso</option>
+                      <option value="info">Informativo</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <Gear size={16} weight="regular" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Mensagem</label>
+                <textarea
+                  rows={3}
+                  value={alertForm.message}
+                  onChange={e => setAlertForm({ ...alertForm, message: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white shadow-sm resize-none"
+                  placeholder="Conteúdo curto e direto..."
+                  required
+                  disabled={isSavingAlert}
+                ></textarea>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Início</label>
+                  <input
+                    type="datetime-local"
+                    value={alertForm.startAt}
+                    onChange={e => setAlertForm({ ...alertForm, startAt: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white shadow-sm"
+                    required
+                    disabled={isSavingAlert}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Término</label>
+                  <input
+                    type="datetime-local"
+                    value={alertForm.endAt || ''}
+                    onChange={e => setAlertForm({ ...alertForm, endAt: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white shadow-sm"
+                    required
+                    disabled={isSavingAlert}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Texto do CTA (opcional)</label>
+                  <input
+                    type="text"
+                    value={alertForm.ctaLabel}
+                    onChange={e => setAlertForm({ ...alertForm, ctaLabel: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white shadow-sm"
+                    placeholder="Ex: Ver detalhes"
+                    disabled={isSavingAlert}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Link do CTA (opcional)</label>
+                  <input
+                    type="url"
+                    value={alertForm.ctaUrl}
+                    onChange={e => setAlertForm({ ...alertForm, ctaUrl: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary-500/50 dark:focus:ring-primary-400/50 outline-none transition-all text-slate-900 dark:text-white shadow-sm"
+                    placeholder="https://..."
+                    disabled={isSavingAlert}
+                  />
+                </div>
+              </div>
+
+              <label className="inline-flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={alertForm.isActive}
+                  onChange={e => setAlertForm({ ...alertForm, isActive: e.target.checked })}
+                  className="w-5 h-5 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                  disabled={isSavingAlert}
+                />
+                Ativar alerta imediatamente (respeitando janela de início/fim)
+              </label>
+            </div>
+
+            <div className="flex-none px-6 sm:px-8 py-4 border-t border-slate-200/80 dark:border-slate-800/80 bg-gradient-to-br from-white via-slate-50/50 to-white dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950 backdrop-blur-xl">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setAlertFormOpen(false)}
+                  disabled={isSavingAlert}
+                  className="flex-1 px-5 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 font-semibold transition-all disabled:opacity-50 shadow-sm hover:shadow-md"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingAlert}
+                  className="flex-1 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary-500 via-primary-600 to-primary-500 hover:from-primary-600 hover:via-primary-700 hover:to-primary-600 text-white font-bold shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 ring-1 ring-primary-400/30"
+                >
+                  {isSavingAlert ? 'Salvando...' : <><FloppyDisk size={18} weight="bold" /> {editingAlertId ? 'Salvar alerta' : 'Publicar alerta'}</>}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* Add/Edit Course Drawer (visual consistente com Notícias) */}
       {isCourseFormOpen && (
         <>
@@ -1032,7 +1401,7 @@ export const Admin: React.FC = () => {
               </div>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Deseja excluir este {confirmDialog.type === 'course' ? 'curso' : 'item'}? Ele será removido do site.
+              Deseja excluir este {confirmDialog.type === 'course' ? 'curso' : confirmDialog.type === 'alert' ? 'alerta' : 'item'}? Ele será removido do site.
             </p>
             <div className="flex gap-3">
               <GlassButton variant="ghost" className="flex-1" onClick={() => setConfirmDialog({ open: false, targetId: null, type: null })} disabled={isSaving}>
@@ -1048,3 +1417,4 @@ export const Admin: React.FC = () => {
     </div>
   );
 };
+

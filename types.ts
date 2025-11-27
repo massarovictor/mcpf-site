@@ -61,3 +61,18 @@ export interface ChatMessage {
   text: string;
   timestamp: Date;
 }
+
+export type AlertLevel = 'info' | 'warning' | 'urgent';
+
+export interface Alert {
+  id: string;
+  title: string;
+  message: string;
+  level: AlertLevel;
+  startAt: string;
+  endAt?: string | null;
+  isActive: boolean;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  createdAt?: string;
+}
