@@ -13,18 +13,19 @@ const mapRowToAlert = (row: any): Alert => ({
   isActive: Boolean(row.is_active ?? row.isActive ?? false),
   ctaLabel: row.cta_label ?? row.ctaLabel ?? '',
   ctaUrl: row.cta_url ?? row.ctaUrl ?? '',
-  createdAt: row.created_at ?? row.createdAt ?? undefined,
+  createdAt: row.created_at ?? row.createdAt ?? new Date().toISOString(),
 });
 
 export async function fetchActiveAlert() {
-  if (!supabase || !hasSupabase) return { data: null as Alert | null, error: 'Supabase n„o configurado' };
+  if (!supabase || !hasSupabase) return { data: null as Alert | null, error: 'Supabase n√£o configurado' };
+
   const now = new Date().toISOString();
   const { data, error } = await supabase
     .from(TABLE)
     .select('*')
     .eq('is_active', true)
     .lte('start_at', now)
-    .gte('end_at', now)
+    .or(`end_at.is.null,end_at.gte.${now}`)
     .order('start_at', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -34,17 +35,20 @@ export async function fetchActiveAlert() {
 }
 
 export async function fetchAlerts() {
-  if (!supabase || !hasSupabase) return { data: [] as Alert[], error: 'Supabase n„o configurado' };
+  if (!supabase || !hasSupabase) return { data: [] as Alert[], error: 'Supabase n√£o configurado' };
+
   const { data, error } = await supabase
     .from(TABLE)
     .select('*')
     .order('created_at', { ascending: false });
+
   if (error) return { data: [], error: error.message };
   return { data: (data || []).map(mapRowToAlert), error: null };
 }
 
 export async function createAlert(alert: Omit<Alert, 'id' | 'createdAt'>) {
-  if (!supabase || !hasSupabase) return { data: null as Alert | null, error: 'Supabase n„o configurado' };
+  if (!supabase || !hasSupabase) return { data: null as Alert | null, error: 'Supabase n√£o configurado' };
+
   const payload = {
     title: alert.title,
     message: alert.message,
@@ -61,7 +65,8 @@ export async function createAlert(alert: Omit<Alert, 'id' | 'createdAt'>) {
 }
 
 export async function updateAlert(alert: Alert) {
-  if (!supabase || !hasSupabase) return { data: null as Alert | null, error: 'Supabase n„o configurado' };
+  if (!supabase || !hasSupabase) return { data: null as Alert | null, error: 'Supabase n√£o configurado' };
+
   const payload = {
     title: alert.title,
     message: alert.message,
@@ -78,7 +83,8 @@ export async function updateAlert(alert: Alert) {
 }
 
 export async function deleteAlert(id: string) {
-  if (!supabase || !hasSupabase) return { error: 'Supabase n„o configurado' };
+  if (!supabase || !hasSupabase) return { error: 'Supabase n√£o configurado' };
+
   const { error } = await supabase.from(TABLE).delete().eq('id', id);
   if (error) return { error: error.message };
   return { error: null };
