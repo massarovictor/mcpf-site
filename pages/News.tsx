@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useData } from "../contexts/DataContext";
 import { GlassCard } from "../components/GlassCard";
 import { GlassButton } from "../components/GlassButton";
@@ -11,6 +13,7 @@ import {
   Funnel,
   X,
   ArrowRight,
+  LinkSimple,
 } from "phosphor-react";
 import { NewsItem } from "../types";
 import { motion } from "framer-motion";
@@ -238,8 +241,34 @@ export const News: React.FC = () => {
                   {selectedNews.summary}
                 </p>
                 {selectedNews.content && (
-                  <div className="mt-4 whitespace-pre-wrap text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {selectedNews.content}
+                  <div className="mt-4 whitespace-pre-wrap text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: ({ node, ...props }) => (
+                          <a
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 dark:text-primary-400 underline font-semibold"
+                          />
+                        ),
+                        ul: ({ node, ...props }) => (
+                          <ul
+                            {...props}
+                            className="list-disc pl-5 marker:text-primary-500 space-y-1"
+                          />
+                        ),
+                        ol: ({ node, ...props }) => (
+                          <ol
+                            {...props}
+                            className="list-decimal pl-5 marker:text-primary-500 space-y-1"
+                          />
+                        ),
+                      }}
+                    >
+                      {selectedNews.content}
+                    </ReactMarkdown>
                   </div>
                 )}
               </div>
@@ -273,6 +302,17 @@ export const News: React.FC = () => {
                                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                                   {event.description}
                                 </p>
+                              )}
+                              {event.url && (
+                                <a
+                                  href={event.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 text-sm font-semibold text-primary-600 dark:text-primary-400 mt-2 hover:underline"
+                                >
+                                  <LinkSimple size={16} weight="regular" />
+                                  Acessar detalhe
+                                </a>
                               )}
                             </div>
                           ))}
