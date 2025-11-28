@@ -105,7 +105,7 @@ export const BreakingAlert: React.FC = () => {
             </span>
           </div>
 
-          {alert.ctaUrl && alert.ctaLabel && (
+          {alert.ctaUrl && (
             <div className="pt-1">
               <a
                 href={alert.ctaUrl}
@@ -113,7 +113,7 @@ export const BreakingAlert: React.FC = () => {
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary-600/90 hover:bg-primary-700 text-white font-semibold shadow-lg shadow-primary-500/30 border border-white/20 transition-all"
               >
-                <LinkIcon size={16} weight="bold" /> {alert.ctaLabel}
+                <LinkIcon size={16} weight="bold" /> {alert.ctaLabel?.trim() || 'Acessar'}
               </a>
             </div>
           )}
