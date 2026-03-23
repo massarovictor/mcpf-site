@@ -8,20 +8,31 @@ import {
 } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
-import { Home } from "./pages/Home";
-import { About } from "./pages/About";
-import { Courses } from "./pages/Courses";
-import { Contact } from "./pages/Contact";
-import { News } from "./pages/News";
 import { BreakingAlert } from "./components/BreakingAlert";
-import { NotFound } from "./pages/NotFound";
 import { Theme } from "./types";
 import { DataProvider } from "./contexts/DataContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { Toaster } from "./components/ui/sonner";
 
-// Lazy load admin pages
+const Home = lazy(() =>
+  import("./pages/Home").then((m) => ({ default: m.Home })),
+);
+const About = lazy(() =>
+  import("./pages/About").then((m) => ({ default: m.About })),
+);
+const Courses = lazy(() =>
+  import("./pages/Courses").then((m) => ({ default: m.Courses })),
+);
+const Contact = lazy(() =>
+  import("./pages/Contact").then((m) => ({ default: m.Contact })),
+);
+const News = lazy(() =>
+  import("./pages/News").then((m) => ({ default: m.News })),
+);
+const NotFound = lazy(() =>
+  import("./pages/NotFound").then((m) => ({ default: m.NotFound })),
+);
 const Dashboard = lazy(() =>
   import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })),
 );
@@ -41,6 +52,17 @@ const ScrollToTop: React.FC = () => {
 
   return null;
 };
+
+const FullScreenLoader: React.FC<{ message?: string }> = ({ message }) => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+      {message ? (
+        <p className="text-slate-500 dark:text-slate-400">{message}</p>
+      ) : null}
+    </div>
+  </div>
+);
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<Theme>(() => {
@@ -75,6 +97,11 @@ const App: React.FC = () => {
   const toggleTheme = () => {
     setTheme((prev) => (prev === Theme.LIGHT ? Theme.DARK : Theme.LIGHT));
   };
+
+  const renderLazyPage = (
+    page: React.ReactNode,
+    message = "Carregando página...",
+  ) => <Suspense fallback={<FullScreenLoader message={message} />}>{page}</Suspense>;
 
   const RequireAuth: React.FC<{ children: React.ReactNode }> = ({
     children,
@@ -112,36 +139,21 @@ const App: React.FC = () => {
                   path="/admin"
                   element={
                     <RequireAuth>
-                      <Suspense
-                        fallback={
-                          <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-                            <div className="flex flex-col items-center gap-4">
-                              <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                              <p className="text-slate-500 dark:text-slate-400">
-                                Carregando painel...
-                              </p>
-                            </div>
-                          </div>
-                        }
-                      >
-                        <Admin />
-                      </Suspense>
+                      {renderLazyPage(<Admin />, "Carregando painel...")}
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <RequireAuth>
+                      {renderLazyPage(<Dashboard />, "Carregando dashboard...")}
                     </RequireAuth>
                   }
                 />
                 <Route
                   path="/login"
-                  element={
-                    <Suspense
-                      fallback={
-                        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-                          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                      }
-                    >
-                      <Login />
-                    </Suspense>
-                  }
+                  element={renderLazyPage(<Login />, "Carregando login...")}
                 />
                 <Route
                   path="*"
@@ -150,34 +162,29 @@ const App: React.FC = () => {
                       <Header theme={theme} toggleTheme={toggleTheme} />
                       <main id="main-content" className="flex-grow">
                         <Routes>
-                          <Route path="/" element={<Home />} />
-                          <Route path="/about" element={<About />} />
-                          <Route path="/courses" element={<Courses />} />
-                          <Route path="/news" element={<News />} />
-                          <Route path="/contact" element={<Contact />} />
+                          <Route path="/" element={renderLazyPage(<Home />)} />
+                          <Route path="/about" element={renderLazyPage(<About />)} />
                           <Route
-                            path="/dashboard"
-                            element={
-                              <Suspense
-                                fallback={
-                                  <div className="min-h-screen flex items-center justify-center">
-                                    <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                                  </div>
-                                }
-                              >
-                                <Dashboard />
-                              </Suspense>
-                            }
+                            path="/courses"
+                            element={renderLazyPage(<Courses />)}
                           />
-                          <Route path="*" element={<NotFound />} />
+                          <Route path="/news" element={renderLazyPage(<News />)} />
+                          <Route
+                            path="/contact"
+                            element={renderLazyPage(<Contact />)}
+                          />
+                          <Route
+                            path="*"
+                            element={renderLazyPage(<NotFound />)}
+                          />
                         </Routes>
                       </main>
                       <Footer />
-                      <Toaster position="top-left" />
                     </>
                   }
                 />
               </Routes>
+              <Toaster position="top-left" />
             </div>
           </Router>
         </DataProvider>

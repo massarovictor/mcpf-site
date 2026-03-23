@@ -338,6 +338,7 @@ export const Dashboard: React.FC = () => {
                     className="!p-0 w-12 h-12 rounded-xl bg-primary-700 hover:bg-primary-600 shadow-lg shadow-primary-600/20 flex items-center justify-center shrink-0"
                     disabled={!input.trim() || isTyping}
                     icon={PaperPlaneTilt}
+                    aria-label="Enviar mensagem"
                   />
                 </form>
               </div>

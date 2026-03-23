@@ -3,7 +3,7 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '../lib/utils';
 
 interface GlassButtonProps extends HTMLMotionProps<"button"> {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost' | 'accent' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -54,7 +54,7 @@ export const GlassButton: React.FC<GlassButtonProps & { isLoading?: boolean }> =
       ) : (
         <>
           {Icon && <Icon className="w-5 h-5" />}
-          <span className="relative z-10">{children}</span>
+          {children ? <span className="relative z-10">{children}</span> : null}
         </>
       )}
 

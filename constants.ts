@@ -1,12 +1,6 @@
 import { NavItem, Course, FacultyMember, NewsItem } from './types';
 
-// ==============================================================================
-// CONFIGURAÇÃO DO INSTAGRAM
-// Defina VITE_INSTAGRAM_TOKEN no .env (token do Graph API).
-// Se deixar vazio, o site mostrará imagens ilustrativas automaticamente.
-// ==============================================================================
-// Instagram envs (token opcional, profile com fallback)
-export const INSTAGRAM_TOKEN = import.meta.env.VITE_INSTAGRAM_TOKEN ?? '';
+// Instagram envs públicos: apenas o profile é exposto no frontend.
 export const INSTAGRAM_PROFILE = import.meta.env.VITE_INSTAGRAM_PROFILE || 'eeepmariacelia'; // usado para o link "Seguir"
 
 export const NAV_ITEMS: NavItem[] = [
@@ -14,6 +8,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'A Escola', path: '/about' },
   { label: 'Cursos', path: '/courses' },
   { label: 'Notícias', path: '/news' },
+  { label: 'Portal do Aluno', path: 'https://mavic-escolar.vercel.app/biblioteca/publica', external: true },
   { label: 'Contato', path: '/contact' },
 ];
 
@@ -199,4 +194,3 @@ A prova de seleção ocorrerá no dia 15 de janeiro de 2026. O resultado prelimi
     type: 'news'
   }
 ];
-

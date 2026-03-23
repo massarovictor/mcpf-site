@@ -28,6 +28,45 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  const renderNavItem = (item: (typeof NAV_ITEMS)[number], className: string) => {
+    const isActive = !item.external && location.pathname === item.path;
+
+    if (item.external) {
+      return (
+        <a
+          key={item.path}
+          href={item.path}
+          target="_blank"
+          rel="noreferrer"
+          className={className}
+        >
+          <span className="relative z-10 group-hover:scale-105 inline-block transition-transform">
+            {item.label}
+          </span>
+        </a>
+      );
+    }
+
+    return (
+      <Link key={item.path} to={item.path} className={className}>
+        {isActive && (
+          <motion.div
+            layoutId="activeNav"
+            className="absolute inset-0 bg-primary-500/10 dark:bg-primary-400/10 rounded-full border border-primary-500/20 dark:border-primary-400/20"
+            transition={{
+              type: "spring",
+              bounce: 0.2,
+              duration: 0.6,
+            }}
+          />
+        )}
+        <span className="relative z-10 group-hover:scale-105 inline-block transition-transform">
+          {item.label}
+        </span>
+      </Link>
+    );
+  };
+
   return (
     <>
       <motion.header
@@ -58,36 +97,17 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 group",
-                    isActive
-                      ? "text-primary-700 dark:text-primary-300"
-                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeNav"
-                      className="absolute inset-0 bg-primary-500/10 dark:bg-primary-400/10 rounded-full border border-primary-500/20 dark:border-primary-400/20"
-                      transition={{
-                        type: "spring",
-                        bounce: 0.2,
-                        duration: 0.6,
-                      }}
-                    />
-                  )}
-                  <span className="relative z-10 group-hover:scale-105 inline-block transition-transform">
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
+            {NAV_ITEMS.map((item) =>
+              renderNavItem(
+                item,
+                cn(
+                  "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 group",
+                  !item.external && location.pathname === item.path
+                    ? "text-primary-700 dark:text-primary-300"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
+                ),
+              ),
+            )}
           </nav>
 
           {/* Actions */}
@@ -151,18 +171,30 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Link
-                  to={item.path}
-                  className={cn(
-                    "block text-lg font-semibold p-4 rounded-2xl transition-all",
-                    location.pathname === item.path
-                      ? "bg-primary-500/10 text-primary-700 dark:text-primary-300"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-800/40",
-                  )}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                {item.external ? (
+                  <a
+                    href={item.path}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block text-lg font-semibold p-4 rounded-2xl transition-all text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-800/40"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={cn(
+                      "block text-lg font-semibold p-4 rounded-2xl transition-all",
+                      location.pathname === item.path
+                        ? "bg-primary-500/10 text-primary-700 dark:text-primary-300"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-800/40",
+                    )}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )}
               </motion.div>
             ))}
           </motion.div>

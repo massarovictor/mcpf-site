@@ -688,8 +688,8 @@ export const Admin: React.FC = () => {
                           <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[11px] font-bold tracking-wide ${statusStyle}`}>{status.toUpperCase()}</span>
                         </div>
                         <div className="flex gap-2">
-                          <GlassButton variant="ghost" icon={PencilSimple} onClick={() => handleOpenAlertForm(alert)} className="h-10" />
-                          <GlassButton variant="ghost" icon={Trash} onClick={() => handleDeleteAlert(alert.id)} className="h-10 text-red-500 hover:text-red-600" />
+                          <GlassButton variant="ghost" icon={PencilSimple} onClick={() => handleOpenAlertForm(alert)} className="h-10" aria-label="Editar alerta" />
+                          <GlassButton variant="ghost" icon={Trash} onClick={() => handleDeleteAlert(alert.id)} className="h-10 text-red-500 hover:text-red-600" aria-label="Excluir alerta" />
                         </div>
                       </div>
                       <div>

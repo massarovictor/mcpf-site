@@ -154,14 +154,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLastError(null);
     if (supabaseEnabled) {
       setIsLoadingNews(true);
-      const { data, error } = await fetchNews();
-      if (error || !data) {
-        setLastError(error ?? 'Erro ao recarregar notícias');
+      setIsLoadingCourses(true);
+      const [newsRes, coursesRes] = await Promise.all([fetchNews(), fetchCourses()]);
+
+      if (newsRes.error || !newsRes.data) {
+        setLastError(newsRes.error ?? 'Erro ao recarregar notícias');
         setNews(INITIAL_NEWS);
       } else {
-        setNews(data);
+        setNews(newsRes.data);
       }
+
+      if (coursesRes.error || !coursesRes.data) {
+        setLastError(coursesRes.error ?? 'Erro ao recarregar cursos');
+        setCourses(INITIAL_COURSES);
+      } else {
+        setCourses(coursesRes.data);
+      }
+
       setIsLoadingNews(false);
+      setIsLoadingCourses(false);
       return;
     }
 

@@ -36,6 +36,8 @@ const FALLBACK_INSTAGRAM = [
   "https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
 ];
 
+const ADMISSION_TOAST_MAX_AGE_DAYS = 45;
+
 interface InstagramPostData {
   imageUrl: string;
   postUrl: string;
@@ -104,6 +106,21 @@ export const Home: React.FC = () => {
     [news],
   );
 
+  const activeAdmissionNotice = useMemo(() => {
+    const now = Date.now();
+    return sortedNews.find((item) => {
+      if (item.category !== "Admissão") return false;
+
+      const publishedAt = getDateTimestamp(item.date);
+      if (!publishedAt || publishedAt > now) return false;
+
+      const ageInDays =
+        (now - publishedAt) / (1000 * 60 * 60 * 24);
+
+      return ageInDays <= ADMISSION_TOAST_MAX_AGE_DAYS;
+    });
+  }, [sortedNews]);
+
   useEffect(() => {
     const fetchInsta = async () => {
       try {
@@ -130,14 +147,14 @@ export const Home: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const admissionNews = sortedNews
-      .slice(0, 3)
-      .some((item) => item.category === "Admissão");
+    if (!activeAdmissionNotice || typeof window === "undefined") return;
 
-    if (admissionNews) {
-      toast.info("O processo seletivo do ano está disponível!");
-    }
-  }, [sortedNews]);
+    const storageKey = `admission-toast:${activeAdmissionNotice.id}`;
+    if (window.sessionStorage.getItem(storageKey)) return;
+
+    toast.info("O processo seletivo do ano está disponível!");
+    window.sessionStorage.setItem(storageKey, "shown");
+  }, [activeAdmissionNotice]);
 
   const HIGHLIGHTS = [
     {

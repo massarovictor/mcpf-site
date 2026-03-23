@@ -6,6 +6,7 @@ export enum Theme {
 export interface NavItem {
   label: string;
   path: string;
+  external?: boolean;
 }
 
 export interface Course {
